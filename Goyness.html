@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Goyness Training Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f3;--bg3:#eeede9;
+  --text:#0f0f0f;--text2:#6b6b68;--text3:#9e9e9a;
+  --border:#e0dfd9;--border2:#c8c7c0;
+  --accent:#0f0f0f;--accent-soft:#f0efeb;
+  --red:#c0392b;--red-bg:#fdf0ef;
+  --green:#2d6a3f;--green-bg:#edf5f0;
+  --radius:10px;--radius-lg:14px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:inherit}
+
+/* HEADER */
+.header{text-align:center;padding:2.5rem 1rem 1.5rem;border-bottom:1px solid var(--border)}
+.logo{font-family:'Black Ops One',sans-serif;font-size:52px;letter-spacing:8px;color:var(--text);line-height:1;display:inline-block;position:relative}
+.logo::before{content:'';position:absolute;bottom:-4px;left:0;right:0;height:3px;background:var(--text)}
+.logo-sub{font-size:10px;font-weight:600;letter-spacing:6px;color:var(--text3);text-transform:uppercase;margin-top:10px}
+
+/* NAV */
+.nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);padding:0 1.5rem;gap:0;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex-shrink:0;padding:14px 18px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s,border-color .15s;white-space:nowrap}
+.nav-btn:hover{color:var(--text)}
+.nav-btn.active{color:var(--text);border-bottom:2px solid var(--text)}
+
+/* TABS */
+.tab{display:none;padding:2rem 1.5rem;max-width:860px;margin:0 auto}
+.tab.active{display:block}
+.section-label{font-size:10px;font-weight:600;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-bottom:1.25rem}
+
+/* TODAY CARD */
+.today-hero{background:var(--text);color:#fff;border-radius:var(--radius-lg);padding:2rem;margin-bottom:1.5rem}
+.today-date{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;opacity:.6;margin-bottom:.5rem}
+.today-day-name{font-family:'Black Ops One',sans-serif;font-size:32px;letter-spacing:3px;margin-bottom:.25rem}
+.today-focus{font-size:14px;opacity:.7;margin-bottom:1.5rem}
+.today-exercises{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.75rem}
+.today-ex-chip{background:rgba(255,255,255,.12);padding:5px 12px;border-radius:99px;font-size:12px;font-weight:500}
+.today-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-start{padding:11px 24px;background:#fff;color:var(--text);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.5px}
+.btn-start:hover{opacity:.9}
+.btn-alt{padding:11px 20px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-alt:hover{background:rgba(255,255,255,.2)}
+
+/* REST DAY */
+.rest-hero{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-bottom:1.5rem;text-align:center}
+.rest-hero h2{font-family:'Black Ops One',sans-serif;font-size:28px;letter-spacing:2px;color:var(--text);margin-bottom:.5rem}
+.rest-hero p{color:var(--text2);font-size:14px}
+
+/* CHOOSE WORKOUT SECTION */
+.choose-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:2rem}
+.choose-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;cursor:pointer;transition:border-color .15s,background .15s}
+.choose-card:hover{border-color:var(--text);background:var(--accent-soft)}
+.choose-card.selected{border-color:var(--text);background:var(--accent-soft)}
+.choose-day{font-family:'Black Ops One',sans-serif;font-size:16px;letter-spacing:1px;color:var(--text);margin-bottom:3px}
+.choose-focus{font-size:11px;color:var(--text2);font-weight:500}
+.choose-count{font-size:11px;color:var(--text3);margin-top:6px}
+
+/* WORKOUT EDITOR */
+.workout-editor{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1.5rem}
+.editor-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.editor-title{font-family:'Black Ops One',sans-serif;font-size:20px;letter-spacing:1px}
+.editor-actions{display:flex;gap:8px;align-items:center}
+.btn-sm{padding:7px 14px;font-size:12px;font-weight:500;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border2);background:none;color:var(--text2)}
+.btn-sm:hover{background:var(--bg2)}
+.btn-sm-primary{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-sm-primary:hover{opacity:.85}
+.exercise-list{}
+.exercise-item{display:flex;align-items:center;gap:12px;padding:14px 1.5rem;border-bottom:1px solid var(--border);transition:background .1s}
+.exercise-item:last-child{border-bottom:none}
+.exercise-item:hover{background:var(--bg2)}
+.ex-drag{color:var(--text3);cursor:grab;font-size:18px}
+.ex-info{flex:1;min-width:0}
+.ex-name-edit{font-size:14px;font-weight:500;color:var(--text)}
+.ex-scheme-edit{font-size:12px;color:var(--text2);margin-top:2px}
+.ex-controls{display:flex;align-items:center;gap:6px}
+.btn-log-ex{padding:5px 12px;font-size:11px;font-weight:600;background:var(--text);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.5px}
+.btn-log-ex:hover{opacity:.8}
+.btn-remove-ex{padding:5px 8px;font-size:14px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text3);cursor:pointer}
+.btn-remove-ex:hover{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.add-exercise-row{padding:1rem 1.5rem;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.add-exercise-row input{flex:1;min-width:140px;padding:8px 12px;font-size:13px;border:1px solid var(--border2);border-radius:7px;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+.add-exercise-row input:focus{outline:none;border-color:var(--text)}
+.scheme-input{max-width:120px!important}
+.btn-add-ex{padding:8px 16px;font-size:12px;font-weight:600;background:var(--text);color:#fff;border:none;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+
+/* LOG MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.75rem;width:380px;max-width:100%;border:1px solid var(--border)}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem}
+.modal-title{font-family:'Black Ops One',sans-serif;font-size:18px;letter-spacing:.5px}
+.modal-date{font-size:12px;color:var(--text3);margin-top:3px}
+.btn-close{background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;padding:2px}
+.btn-close:hover{color:var(--text)}
+.sets-header{display:grid;grid-template-columns:36px 1fr 1fr 80px;gap:8px;margin-bottom:8px}
+.sets-col-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);text-align:center}
+.set-rows{display:flex;flex-direction:column;gap:7px;margin-bottom:1.25rem}
+.set-row{display:grid;grid-template-columns:36px 1fr 1fr 80px;gap:8px;align-items:center}
+.set-num{font-size:12px;font-weight:600;color:var(--text3);text-align:center}
+.set-row input{padding:8px 10px;font-size:13px;border:1px solid var(--border2);border-radius:7px;background:var(--bg2);color:var(--text);font-family:'DM Sans',sans-serif;text-align:center;width:100%}
+.set-row input:focus{outline:none;border-color:var(--text)}
+.prev-badge{font-size:10px;color:var(--text3);text-align:center;line-height:1.2}
+.modal-footer{display:flex;gap:8px}
+.btn-modal-save{flex:1;padding:11px;background:var(--text);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-modal-save:hover{opacity:.85}
+.btn-modal-cancel{padding:11px 18px;background:none;border:1px solid var(--border2);border-radius:8px;font-size:13px;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif}
+.add-set-row{display:flex;justify-content:center;margin-bottom:1.25rem}
+.btn-add-set{font-size:12px;color:var(--text3);background:none;border:1px dashed var(--border2);border-radius:7px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-add-set:hover{border-color:var(--text);color:var(--text)}
+.prev-best{background:var(--bg2);border-radius:8px;padding:10px 14px;margin-bottom:1.25rem;font-size:12px;color:var(--text2)}
+.prev-best strong{color:var(--text);font-weight:600}
+
+/* PROGRESS */
+.prog-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center}
+.prog-select{padding:8px 12px;font-size:13px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-family:'DM Sans',sans-serif;min-width:200px}
+.chart-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-bottom:1.5rem}
+.chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:1.25rem}
+.history-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:1rem}
+.history-table th{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border2);font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase}
+.history-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.history-table tbody tr:hover{background:var(--bg2)}
+.badge-up{font-size:10px;background:var(--green-bg);color:var(--green);padding:3px 8px;border-radius:99px;font-weight:600}
+.badge-dn{font-size:10px;background:var(--red-bg);color:var(--red);padding:3px 8px;border-radius:99px;font-weight:600}
+.badge-eq{font-size:10px;background:var(--bg2);color:var(--text3);padding:3px 8px;border-radius:99px}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:13px}
+
+/* BODY WEIGHT */
+.bw-input-row{display:flex;gap:8px;margin-bottom:1.75rem;align-items:center}
+.bw-input-row input{padding:9px 14px;font-size:14px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-family:'DM Sans',sans-serif;width:130px}
+.bw-input-row input:focus{outline:none;border-color:var(--text)}
+.btn-log-bw{padding:9px 20px;background:var(--text);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.75rem}
+.stat-card{background:var(--bg2);border-radius:var(--radius);padding:1.1rem;text-align:center}
+.stat-val{font-size:22px;font-weight:600;color:var(--text);font-family:'Black Ops One',sans-serif;letter-spacing:1px}
+.stat-lbl{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-top:4px}
+
+/* PRs */
+.pr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:1.5rem}
+.pr-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem}
+.pr-card-name{font-family:'Black Ops One',sans-serif;font-size:15px;letter-spacing:.5px;margin-bottom:1rem;color:var(--text)}
+.pr-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+.pr-col{text-align:center;flex:1}
+.pr-num{font-size:26px;font-weight:600;font-family:'Black Ops One',sans-serif;letter-spacing:1px;color:var(--text)}
+.pr-lbl{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-top:2px}
+.pr-reps{font-size:11px;color:var(--text2);margin-top:1px}
+.pr-arrow{font-size:22px;color:var(--border2);padding-bottom:10px;flex-shrink:0}
+.pr-bar-wrap{background:var(--bg3);border-radius:99px;height:5px;margin-bottom:6px;overflow:hidden}
+.pr-bar{height:5px;border-radius:99px;background:var(--text);transition:width .5s ease}
+.pr-pct{font-size:11px;color:var(--text3);text-align:right}
+.pr-set-target{display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);align-items:center}
+.pr-set-target input{flex:1;padding:7px 9px;font-size:12px;border:1px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text);font-family:'DM Sans',sans-serif;text-align:center}
+.pr-set-target input:focus{outline:none;border-color:var(--text)}
+.pr-set-target button{padding:7px 12px;font-size:11px;font-weight:600;background:var(--text);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.new-pr-btn{display:flex;align-items:center;gap:8px;padding:1.25rem;background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--radius-lg);cursor:pointer;font-size:13px;color:var(--text2);font-family:'DM Sans',sans-serif;font-weight:500;width:100%;margin-top:4px}
+.new-pr-btn:hover{border-color:var(--text);color:var(--text);background:var(--accent-soft)}
+
+/* ADD PR MODAL */
+.pr-modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.75rem;width:360px;max-width:100%;border:1px solid var(--border)}
+.pr-modal h3{font-family:'Black Ops One',sans-serif;font-size:18px;letter-spacing:.5px;margin-bottom:1.25rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.form-group input{width:100%;padding:9px 12px;font-size:13px;border:1px solid var(--border2);border-radius:7px;background:var(--bg2);color:var(--text);font-family:'DM Sans',sans-serif}
+.form-group input:focus{outline:none;border-color:var(--text)}
+
+/* WEEK INDICATOR */
+.week-strip{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap}
+.week-day{flex:1;min-width:40px;text-align:center;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:600}
+.week-day.today-d{background:var(--text);color:#fff}
+.week-day.workout-d{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+.week-day.rest-d{color:var(--text3)}
+.week-day-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;opacity:.7;margin-bottom:2px}
+.week-day-abbr{font-size:13px;font-weight:600}
+
+/* TOASTER */
+.toaster{position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--text);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">GOYNESS</div>
+  <div class="logo-sub">Training Log</div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="switchTab('today',this)">Today</button>
+  <button class="nav-btn" onclick="switchTab('workouts',this)">Workouts</button>
+  <button class="nav-btn" onclick="switchTab('progress',this)">Progress</button>
+  <button class="nav-btn" onclick="switchTab('bodyweight',this)">Body Weight</button>
+  <button class="nav-btn" onclick="switchTab('prs',this)">Personal Bests</button>
+</div>
+
+<!-- TODAY TAB -->
+<div id="tab-today" class="tab active">
+  <div id="week-strip-wrap"></div>
+  <div id="today-content"></div>
+  <div style="margin-top:2rem">
+    <p class="section-label">Choose a different workout</p>
+    <div class="choose-grid" id="choose-grid"></div>
+  </div>
+</div>
+
+<!-- WORKOUTS TAB -->
+<div id="tab-workouts" class="tab">
+  <p class="section-label">Manage Workouts</p>
+  <div class="choose-grid" id="manage-choose-grid"></div>
+  <div id="editor-wrap"></div>
+</div>
+
+<!-- PROGRESS TAB -->
+<div id="tab-progress" class="tab">
+  <p class="section-label">Lift History</p>
+  <div class="prog-filters">
+    <select class="prog-select" id="prog-select" onchange="renderHistory()">
+      <option value="">Select exercise...</option>
+    </select>
+  </div>
+  <div id="prog-chart-card" class="chart-card" style="display:none">
+    <div class="chart-title" id="prog-chart-title"></div>
+    <div style="position:relative;width:100%;height:240px">
+      <canvas id="prog-chart" role="img" aria-label="Weight over time">Log sessions to see chart.</canvas>
+    </div>
+  </div>
+  <div id="history-wrap"><div class="empty-state">Select an exercise to view history.</div></div>
+</div>
+
+<!-- BODY WEIGHT TAB -->
+<div id="tab-bodyweight" class="tab">
+  <p class="section-label">Body Weight Tracker</p>
+  <div class="bw-input-row">
+    <input type="number" id="bw-input" placeholder="Weight (lbs)" step="0.1"/>
+    <button class="btn-log-bw" onclick="logBodyWeight()">Log</button>
+  </div>
+  <div class="stat-grid" id="bw-stats">
+    <div class="stat-card"><div class="stat-val" id="bw-cur">—</div><div class="stat-lbl">Current</div></div>
+    <div class="stat-card"><div class="stat-val" id="bw-start">—</div><div class="stat-lbl">Starting</div></div>
+    <div class="stat-card"><div class="stat-val" id="bw-chg">—</div><div class="stat-lbl">Total Change</div></div>
+  </div>
+  <div id="bw-chart-card" class="chart-card" style="display:none">
+    <div class="chart-title">Weight Over Time</div>
+    <div style="position:relative;width:100%;height:240px">
+      <canvas id="bw-chart" role="img" aria-label="Body weight over time">Log weights to see chart.</canvas>
+    </div>
+  </div>
+  <div id="bw-empty" class="empty-state">Log your first weigh-in to start tracking.</div>
+</div>
+
+<!-- PRS TAB -->
+<div id="tab-prs" class="tab">
+  <p class="section-label">Personal Bests</p>
+  <div class="pr-grid" id="pr-grid"></div>
+  <button class="new-pr-btn" onclick="openAddPR()">
+    <i class="ti ti-plus" aria-hidden="true"></i> Add a lift to track
+  </button>
+</div>
+
+<!-- LOG MODAL -->
+<div class="modal-overlay" id="log-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-date" id="modal-scheme"></div>
+      </div>
+      <button class="btn-close" onclick="closeLogModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="prev-best" id="prev-best-row" style="display:none"></div>
+    <div class="sets-header">
+      <div></div>
+      <div class="sets-col-lbl">Weight (lbs)</div>
+      <div class="sets-col-lbl">Reps</div>
+      <div class="sets-col-lbl">Last Time</div>
+    </div>
+    <div class="set-rows" id="set-rows"></div>
+    <div class="add-set-row">
+      <button class="btn-add-set" onclick="addSetRow()"><i class="ti ti-plus" aria-hidden="true"></i> Add set</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeLogModal()">Cancel</button>
+      <button class="btn-modal-save" onclick="saveSession()">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PR MODAL -->
+<div class="modal-overlay" id="pr-modal-overlay">
+  <div class="pr-modal">
+    <h3>Add PR Target</h3>
+    <div class="form-group">
+      <label>Exercise Name</label>
+      <input type="text" id="new-pr-name" placeholder="e.g. Barbell Bench Press"/>
+    </div>
+    <div class="form-group">
+      <label>Target Weight (lbs)</label>
+      <input type="number" id="new-pr-weight" placeholder="e.g. 225"/>
+    </div>
+    <div class="form-group">
+      <label>Target Reps</label>
+      <input type="number" id="new-pr-reps" placeholder="e.g. 3"/>
+    </div>
+    <div class="modal-footer" style="margin-top:1.25rem">
+      <button class="btn-modal-cancel" onclick="closeAddPR()">Cancel</button>
+      <button class="btn-modal-save" onclick="saveNewPR()">Add Target</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTER -->
+<div class="toaster" id="toaster"></div>
+
+<script>
+// ─── DATA DEFAULTS ───────────────────────────────────────────────────────────
+const DEFAULT_PROGRAM = [
+  {id:'upperA', day:'Monday', focus:'Upper A — Chest Focus', exercises:[
+    {name:'Barbell Bench Press', scheme:'4 × 6-8', sets:4},
+    {name:'Incline Dumbbell Press', scheme:'3 × 8-12', sets:3},
+    {name:'Pull-Ups', scheme:'4 × 6-10', sets:4},
+    {name:'Cable Row', scheme:'3 × 10-12', sets:3},
+    {name:'Tricep Pushdowns', scheme:'3 × 12-15', sets:3},
+    {name:'Bicep Curls', scheme:'3 × 12-15', sets:3}
+  ]},
+  {id:'lowerA', day:'Tuesday', focus:'Lower A', exercises:[
+    {name:'Hang Cleans', scheme:'3 × 3', sets:3},
+    {name:'Front Squat', scheme:'4 × 6-8', sets:4},
+    {name:'Romanian Deadlift', scheme:'4 × 8-10', sets:4},
+    {name:'Walking Lunges', scheme:'3 × 10 each', sets:3},
+    {name:'Standing Calf Raises', scheme:'4 × 15-20', sets:4},
+    {name:'Plank', scheme:'3 × 45-60 sec', sets:3}
+  ]},
+  {id:'upperB', day:'Thursday', focus:'Upper B — Shoulder Focus', exercises:[
+    {name:'Standing Barbell OHP', scheme:'4 × 6-8', sets:4},
+    {name:'Face Pulls', scheme:'3 × 15', sets:3},
+    {name:'Weighted Pull-Ups', scheme:'4 × 6-8', sets:4},
+    {name:'Close-Grip Bench Press', scheme:'3 × 8-10', sets:3},
+    {name:'Lateral Raises', scheme:'3 × 15-20', sets:3},
+    {name:'Hammer Curls', scheme:'3 × 12', sets:3}
+  ]},
+  {id:'lowerB', day:'Friday', focus:'Lower B', exercises:[
+    {name:'Barbell Hack Squat', scheme:'4 × 8-10', sets:4},
+    {name:'Romanian Deadlift', scheme:'4 × 8-10', sets:4},
+    {name:'Barbell Hip Thrust', scheme:'4 × 10-12', sets:4},
+    {name:'Calf Raises', scheme:'4 × 15-20', sets:4},
+    {name:'Hanging Leg Raises', scheme:'3 × 10-15', sets:3}
+  ]}
+];
+
+const DEFAULT_COLLEGE_PRS = [
+  {name:'Barbell Bench Press', weight:235, reps:3},
+  {name:'Back Squat', weight:315, reps:3},
+  {name:'Hang Cleans', weight:245, reps:1}
+];
+
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+function load(k, d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch{ return d; } }
+function save(k, v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+
+let program  = load('g_program', JSON.parse(JSON.stringify(DEFAULT_PROGRAM)));
+let sessions = load('g_sessions', []);
+let bwLog    = load('g_bw', []);
+let prs      = load('g_prs', JSON.parse(JSON.stringify(DEFAULT_COLLEGE_PRS)));
+let programStartDate = load('g_start', null);
+
+// Set start date to today if not set
+if(!programStartDate){ programStartDate = new Date().toISOString(); save('g_start', programStartDate); }
+
+// ─── SCHEDULE LOGIC ───────────────────────────────────────────────────────────
+// Pattern: Mon=upperA, Tue=lowerA, Wed=rest, Thu=upperB, Fri=lowerB, Sat=rest, Sun=rest
+const SCHEDULE = [null,'upperA','lowerA',null,'upperB','lowerB',null]; // 0=Sun
+function getWorkoutForDate(d){ return SCHEDULE[d.getDay()]||null; }
+function getProgramById(id){ return program.find(p=>p.id===id)||null; }
+
+// ─── TODAY ────────────────────────────────────────────────────────────────────
+function renderToday(){
+  const today = new Date();
+  const dow = today.getDay();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const fullDays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  // Week strip
+  const stripWrap = document.getElementById('week-strip-wrap');
+  let stripHTML = '<div class="week-strip">';
+  for(let i=0;i<7;i++){
+    const d = new Date(today); d.setDate(today.getDate()-dow+i);
+    const wid = getWorkoutForDate(d);
+    const cls = i===dow ? 'today-d' : wid ? 'workout-d' : 'rest-d';
+    const label = wid ? program.find(p=>p.id===wid)?.day.slice(0,3)||'' : i===dow?'Today':'';
+    stripHTML += `<div class="week-day ${cls}"><div class="week-day-label">${days[i]}</div><div class="week-day-abbr">${d.getDate()}</div></div>`;
+  }
+  stripHTML += '</div>';
+  stripWrap.innerHTML = stripHTML;
+
+  const wid = getWorkoutForDate(today);
+  const content = document.getElementById('today-content');
+  if(wid){
+    const w = getProgramById(wid);
+    content.innerHTML = `
+      <div class="today-hero">
+        <div class="today-date">${fullDays[dow]} · ${today.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+        <div class="today-day-name">${w.focus.split('—')[0].trim()}</div>
+        <div class="today-focus">${w.focus.split('—')[1]?.trim()||''}</div>
+        <div class="today-exercises">${w.exercises.map(e=>`<div class="today-ex-chip">${e.name}</div>`).join('')}</div>
+        <div class="today-actions">
+          <button class="btn-start" onclick="startWorkout('${w.id}')">Start This Workout</button>
+        </div>
+      </div>`;
+  } else {
+    content.innerHTML = `
+      <div class="rest-hero">
+        <h2>Rest Day</h2>
+        <p>${fullDays[dow]} is a scheduled rest day. Recovery is part of the program.</p>
+      </div>`;
+  }
+
+  // Choose different
+  const grid = document.getElementById('choose-grid');
+  grid.innerHTML = program.map(w=>`
+    <div class="choose-card" onclick="startWorkout('${w.id}')">
+      <div class="choose-day">${w.day}</div>
+      <div class="choose-focus">${w.focus}</div>
+      <div class="choose-count">${w.exercises.length} exercises</div>
+    </div>`).join('');
+}
+
+function startWorkout(wid){
+  // Switch to workouts tab and open editor
+  switchTab('workouts', document.querySelectorAll('.nav-btn')[1]);
+  setTimeout(()=>openEditor(wid), 50);
+}
+
+// ─── WORKOUTS TAB ─────────────────────────────────────────────────────────────
+let activeEditorId = null;
+
+function renderManageGrid(){
+  const grid = document.getElementById('manage-choose-grid');
+  grid.innerHTML = program.map(w=>`
+    <div class="choose-card${activeEditorId===w.id?' selected':''}" onclick="openEditor('${w.id}')">
+      <div class="choose-day">${w.day}</div>
+      <div class="choose-focus">${w.focus}</div>
+      <div class="choose-count">${w.exercises.length} exercises</div>
+    </div>`).join('');
+}
+
+function openEditor(wid){
+  activeEditorId = wid;
+  renderManageGrid();
+  const w = getProgramById(wid);
+  if(!w){ document.getElementById('editor-wrap').innerHTML=''; return; }
+  const wrap = document.getElementById('editor-wrap');
+  wrap.innerHTML = `
+    <div class="workout-editor">
+      <div class="editor-header">
+        <div>
+          <div class="editor-title">${w.focus}</div>
+        </div>
+        <div class="editor-actions">
+          <button class="btn-sm btn-sm-primary" onclick="startLoggingWorkout('${wid}')"><i class="ti ti-player-play" aria-hidden="true"></i> Start & Log</button>
+        </div>
+      </div>
+      <div class="exercise-list" id="ex-list-${wid}">
+        ${renderExerciseItems(wid)}
+      </div>
+      <div class="add-exercise-row">
+        <input type="text" id="new-ex-name-${wid}" placeholder="Exercise name"/>
+        <input type="text" id="new-ex-scheme-${wid}" class="scheme-input" placeholder="e.g. 3 × 10"/>
+        <input type="number" id="new-ex-sets-${wid}" class="scheme-input" placeholder="Sets" style="max-width:70px"/>
+        <button class="btn-add-ex" onclick="addExercise('${wid}')"><i class="ti ti-plus" aria-hidden="true"></i> Add</button>
+      </div>
+    </div>`;
+}
+
+function renderExerciseItems(wid){
+  const w = getProgramById(wid);
+  if(!w || !w.exercises.length) return '<div class="empty-state" style="padding:1.5rem">No exercises. Add one below.</div>';
+  return w.exercises.map((e,i)=>`
+    <div class="exercise-item">
+      <div class="ex-info">
+        <div class="ex-name-edit">${e.name}</div>
+        <div class="ex-scheme-edit">${e.scheme}</div>
+      </div>
+      <div class="ex-controls">
+        <button class="btn-log-ex" onclick="openLogModal('${e.name.replace(/'/g,"\\'")}','${e.scheme}',${e.sets},'${wid}')">Log</button>
+        <button class="btn-remove-ex" title="Remove exercise" onclick="removeExercise('${wid}',${i})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function addExercise(wid){
+  const nameEl = document.getElementById('new-ex-name-'+wid);
+  const schemeEl = document.getElementById('new-ex-scheme-'+wid);
+  const setsEl = document.getElementById('new-ex-sets-'+wid);
+  const name = nameEl.value.trim();
+  if(!name){ toast('Enter an exercise name'); return; }
+  const scheme = schemeEl.value.trim()||'3 × 10';
+  const sets = parseInt(setsEl.value)||3;
+  const w = getProgramById(wid);
+  w.exercises.push({name, scheme, sets});
+  save('g_program', program);
+  nameEl.value=''; schemeEl.value=''; setsEl.value='';
+  document.getElementById('ex-list-'+wid).innerHTML = renderExerciseItems(wid);
+  renderManageGrid();
+  toast('Exercise added');
+}
+
+function removeExercise(wid, idx){
+  const w = getProgramById(wid);
+  w.exercises.splice(idx,1);
+  save('g_program', program);
+  document.getElementById('ex-list-'+wid).innerHTML = renderExerciseItems(wid);
+  renderManageGrid();
+  toast('Exercise removed');
+}
+
+function startLoggingWorkout(wid){
+  const w = getProgramById(wid);
+  if(!w||!w.exercises.length){ toast('No exercises in this workout'); return; }
+  // Open log modal for first exercise
+  const e = w.exercises[0];
+  openLogModal(e.name, e.scheme, e.sets, wid, 0);
+}
+
+// ─── LOG MODAL ────────────────────────────────────────────────────────────────
+let modalState = null;
+let modalSetCount = 0;
+
+function openLogModal(exName, scheme, numSets, wid, exIdx){
+  modalState = {exName, scheme, numSets, wid, exIdx: exIdx??null};
+  modalSetCount = numSets||3;
+  document.getElementById('modal-title').textContent = exName;
+  document.getElementById('modal-scheme').textContent = scheme + ' · ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  // Previous best
+  const prev = sessions.filter(s=>s.exercise===exName);
+  const lastSession = prev.length ? prev[prev.length-1] : null;
+  const prevRow = document.getElementById('prev-best-row');
+  if(lastSession){
+    const maxW = Math.max(...lastSession.sets.filter(s=>s.weight).map(s=>s.weight));
+    const maxR = lastSession.sets.filter(s=>s.weight===maxW)[0]?.reps||'?';
+    prevRow.style.display='block';
+    prevRow.innerHTML = `<strong>Last session:</strong> ${maxW} lbs × ${maxR} reps on ${new Date(lastSession.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+  } else { prevRow.style.display='none'; }
+
+  renderSetRows(lastSession);
+  document.getElementById('log-modal').classList.add('open');
+}
+
+function renderSetRows(lastSession){
+  const rows = document.getElementById('set-rows');
+  rows.innerHTML = Array.from({length:modalSetCount},(_,i)=>{
+    const prev = lastSession?.sets?.[i];
+    return `<div class="set-row">
+      <div class="set-num">S${i+1}</div>
+      <input type="number" id="mw-${i}" placeholder="${prev?.weight||'lbs'}" step="2.5"/>
+      <input type="number" id="mr-${i}" placeholder="${prev?.reps||'reps'}"/>
+      <div class="prev-badge">${prev?`${prev.weight||'—'} × ${prev.reps||'—'}` : '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function addSetRow(){
+  modalSetCount++;
+  const lastSession = sessions.filter(s=>s.exercise===modalState?.exName).slice(-1)[0]||null;
+  renderSetRows(lastSession);
+}
+
+function closeLogModal(){ document.getElementById('log-modal').classList.remove('open'); modalState=null; }
+
+function saveSession(){
+  if(!modalState)return;
+  const sets = Array.from({length:modalSetCount},(_,i)=>({
+    weight: parseFloat(document.getElementById('mw-'+i)?.value)||null,
+    reps:   parseInt(document.getElementById('mr-'+i)?.value)||null
+  }));
+  const entry = {exercise:modalState.exName, date:new Date().toISOString(), sets};
+  sessions.push(entry);
+  save('g_sessions', sessions);
+
+  // Check new PR
+  const allPrev = sessions.filter(s=>s.exercise===modalState.exName && s.date!==entry.date);
+  const prevMax = allPrev.length ? Math.max(...allPrev.flatMap(s=>s.sets.filter(x=>x.weight).map(x=>x.weight))) : 0;
+  const newMax = Math.max(...sets.filter(x=>x.weight).map(x=>x.weight));
+  if(newMax>prevMax && prevMax>0) toast('New PR! ' + newMax + ' lbs 🔥');
+  else toast('Session saved');
+
+  closeLogModal();
+  if(document.getElementById('tab-prs').classList.contains('active')) renderPRs();
+}
+
+// ─── PROGRESS ─────────────────────────────────────────────────────────────────
+function populateProgSelect(){
+  const sel = document.getElementById('prog-select');
+  const prev = sel.value;
+  const exNames = [...new Set(sessions.map(s=>s.exercise))];
+  sel.innerHTML = '<option value="">Select exercise...</option>' + exNames.map(n=>`<option value="${n}"${n===prev?' selected':''}>${n}</option>`).join('');
+  renderHistory();
+}
+
+let progChartInst = null;
+function renderHistory(){
+  const ex = document.getElementById('prog-select').value;
+  const card = document.getElementById('prog-chart-card');
+  const hw = document.getElementById('history-wrap');
+  if(!ex){ card.style.display='none'; hw.innerHTML='<div class="empty-state">Select an exercise to view history.</div>'; return; }
+  const rel = sessions.filter(s=>s.exercise===ex);
+  if(!rel.length){ card.style.display='none'; hw.innerHTML='<div class="empty-state">No sessions logged yet for '+ex+'.</div>'; return; }
+  card.style.display='block';
+  document.getElementById('prog-chart-title').textContent = ex + ' — Max Weight Over Time';
+  const labels = rel.map(s=>new Date(s.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const maxWts = rel.map(s=>{ const ws=s.sets.filter(x=>x.weight).map(x=>x.weight); return ws.length?Math.max(...ws):null; });
+  if(progChartInst) progChartInst.destroy();
+  progChartInst = new Chart(document.getElementById('prog-chart'),{
+    type:'line',
+    data:{labels, datasets:[{label:'Max (lbs)',data:maxWts,borderColor:'#0f0f0f',backgroundColor:'rgba(15,15,15,.07)',pointBackgroundColor:'#0f0f0f',borderWidth:2,tension:.3,fill:true,pointRadius:5,pointHoverRadius:7}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},callback:v=>v+' lbs'}},x:{grid:{display:false},ticks:{font:{size:11},maxRotation:45}}}}
+  });
+  hw.innerHTML = `<table class="history-table">
+    <thead><tr><th>Date</th><th>Sets</th><th>Top Weight</th><th>vs Prior</th></tr></thead>
+    <tbody>${rel.map((s,i)=>{
+      const top = Math.max(...s.sets.filter(x=>x.weight).map(x=>x.weight)||[0]);
+      const prev = i>0?Math.max(...rel[i-1].sets.filter(x=>x.weight).map(x=>x.weight)||[0]):null;
+      const diff = prev!==null?top-prev:null;
+      const badge = diff===null?'—': diff>0?`<span class="badge-up">+${diff} lbs</span>`: diff<0?`<span class="badge-dn">${diff} lbs</span>`:`<span class="badge-eq">same</span>`;
+      return `<tr><td>${new Date(s.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td><td>${s.sets.length}</td><td>${top} lbs</td><td>${badge}</td></tr>`;
+    }).reverse().join('')}</tbody>
+  </table>`;
+}
+
+// ─── BODY WEIGHT ──────────────────────────────────────────────────────────────
+let bwChartInst = null;
+function logBodyWeight(){
+  const v = parseFloat(document.getElementById('bw-input').value);
+  if(!v||v<50||v>500){ toast('Enter a valid weight'); return; }
+  bwLog.push({date:new Date().toISOString(), weight:v});
+  save('g_bw', bwLog);
+  document.getElementById('bw-input').value='';
+  renderBWTab();
+  toast('Weight logged');
+}
+
+function renderBWTab(){
+  const empty = document.getElementById('bw-empty');
+  const card = document.getElementById('bw-chart-card');
+  if(!bwLog.length){ empty.style.display='block'; card.style.display='none'; return; }
+  empty.style.display='none'; card.style.display='block';
+  const cur = bwLog[bwLog.length-1].weight;
+  const start = bwLog[0].weight;
+  const diff = +(cur-start).toFixed(1);
+  document.getElementById('bw-cur').textContent = cur+' lbs';
+  document.getElementById('bw-start').textContent = start+' lbs';
+  const chgEl = document.getElementById('bw-chg');
+  chgEl.textContent = (diff>=0?'+':'')+diff+' lbs';
+  chgEl.style.color = diff>=0?'var(--green)':'var(--red)';
+  const labels = bwLog.map(e=>new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const weights = bwLog.map(e=>e.weight);
+  if(bwChartInst) bwChartInst.destroy();
+  bwChartInst = new Chart(document.getElementById('bw-chart'),{
+    type:'line',
+    data:{labels,datasets:[{label:'Weight (lbs)',data:weights,borderColor:'#0f0f0f',backgroundColor:'rgba(15,15,15,.07)',pointBackgroundColor:'#0f0f0f',borderWidth:2,tension:.3,fill:true,pointRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},callback:v=>v+' lbs'}},x:{grid:{display:false},ticks:{font:{size:11},maxRotation:45}}}}
+  });
+}
+
+// ─── PERSONAL BESTS ───────────────────────────────────────────────────────────
+function currentPRMap(){
+  const map = {};
+  sessions.forEach(s=>s.sets.forEach(set=>{
+    if(!set.weight)return;
+    if(!map[s.exercise]||set.weight>map[s.exercise].weight||(set.weight===map[s.exercise].weight&&(set.reps||0)>(map[s.exercise].reps||0))){
+      map[s.exercise]={weight:set.weight,reps:set.reps||0,date:s.date};
+    }
+  }));
+  return map;
+}
+
+function renderPRs(){
+  const curMap = currentPRMap();
+  const grid = document.getElementById('pr-grid');
+  if(!prs.length){ grid.innerHTML=''; return; }
+  grid.innerHTML = prs.map((pr,idx)=>{
+    const cur = curMap[pr.name];
+    const pct = cur?Math.min(100,Math.round((cur.weight/pr.weight)*100)):0;
+    return `<div class="pr-card">
+      <div class="pr-card-name">${pr.name}</div>
+      <div class="pr-row">
+        <div class="pr-col">
+          <div class="pr-num">${cur?cur.weight+' lbs':'—'}</div>
+          <div class="pr-lbl">Current PR</div>
+          ${cur?`<div class="pr-reps">${cur.reps} rep${cur.reps!==1?'s':''}</div>`:''}
+        </div>
+        <div class="pr-arrow">→</div>
+        <div class="pr-col">
+          <div class="pr-num" style="color:var(--text3)">${pr.weight} lbs</div>
+          <div class="pr-lbl">Target</div>
+          <div class="pr-reps">${pr.reps} rep${pr.reps!==1?'s':''}</div>
+        </div>
+      </div>
+      ${cur?`<div class="pr-bar-wrap"><div class="pr-bar" style="width:${pct}%"></div></div><div class="pr-pct">${pct}% of target</div>`:'<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Log sessions to track progress toward this target.</div>'}
+      <div class="pr-set-target">
+        <input type="number" id="prt-w-${idx}" placeholder="Update target lbs"/>
+        <input type="number" id="prt-r-${idx}" placeholder="reps" style="max-width:70px"/>
+        <button onclick="updatePRTarget(${idx})">Update</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updatePRTarget(idx){
+  const w = parseFloat(document.getElementById('prt-w-'+idx).value);
+  const r = parseInt(document.getElementById('prt-r-'+idx).value)||1;
+  if(!w){ toast('Enter a weight'); return; }
+  prs[idx].weight = w; prs[idx].reps = r;
+  save('g_prs', prs);
+  renderPRs();
+  toast('Target updated');
+}
+
+function openAddPR(){ document.getElementById('pr-modal-overlay').classList.add('open'); }
+function closeAddPR(){ document.getElementById('pr-modal-overlay').classList.remove('open'); }
+function saveNewPR(){
+  const name = document.getElementById('new-pr-name').value.trim();
+  const weight = parseFloat(document.getElementById('new-pr-weight').value);
+  const reps = parseInt(document.getElementById('new-pr-reps').value)||1;
+  if(!name||!weight){ toast('Enter name and target weight'); return; }
+  prs.push({name,weight,reps});
+  save('g_prs',prs);
+  closeAddPR();
+  renderPRs();
+  document.getElementById('new-pr-name').value='';
+  document.getElementById('new-pr-weight').value='';
+  document.getElementById('new-pr-reps').value='';
+  toast('PR target added');
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function switchTab(name, btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(name==='progress') populateProgSelect();
+  if(name==='bodyweight') renderBWTab();
+  if(name==='prs') renderPRs();
+  if(name==='workouts') renderManageGrid();
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg){
+  const t = document.getElementById('toaster');
+  const el = document.createElement('div');
+  el.className='toast'; el.textContent=msg;
+  t.appendChild(el);
+  requestAnimationFrame(()=>{ el.classList.add('show'); });
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),300); },2500);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderToday();
+renderManageGrid();
+renderBWTab();
+renderPRs();
+</script>
+</body>
+</html>
